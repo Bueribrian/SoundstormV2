@@ -5,6 +5,16 @@ import Chat from "./components/Chat";
 import { SourceProps } from "react-player/base";
 import "./App.scss";
 
+
+/*
+TODO
+Extraer logica del componente APP y crear rutas
+Crear pages: Rooms, Login, Register, Home
+*/
+
+
+
+
 const BASE_URL: string = process.env.REACT_APP_BASE_URL || "192.168.0.33:4000";
 
 interface Song {
