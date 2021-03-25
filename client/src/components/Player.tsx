@@ -14,43 +14,67 @@ const Player: FC<any> = ({
   handleSubmitSong,
   currentSong,
   setCurrentSong,
+  ...rest
 }): JSX.Element => {
+  const [soundCounter, setSoundCounter] = useState(0);
   const [muted, setMuted] = useState<boolean | undefined>(true);
-
+  const [playing, setPlaying] = useState(true)
   return (
-    <>
+    <div {...rest}>
       {songs?.length !== 0 ? (
-          <>
-        <ReactPlayer
-          playing
-          muted={muted}
-          controls={true}
-          url={songs ? songs[0].song : ""}
-        />
-        <button onClick={() => setMuted(!muted)}>unmuted</button>
+        <>
+          <div className="player-wrapper">
+            <ReactPlayer
+              className='react-player'
+              onPause={() => setPlaying(false)}
+              playing={playing}
+              width="100%"
+              height="100%"
+              muted={muted}
+              controls={true}
+              onEnded={() => setSoundCounter(soundCounter + 1 >= songs.length ? 0 : soundCounter + 1)}
+              url={songs[soundCounter].song || ""}
+            />
+          </div>
+          <div>
+            <h2 className='text-center mt-3 mb-2'>Controls</h2>
+            <div className='flex justify-center bg-gray-800 p-3'>
+              <button className='mx-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full' onClick={() => setMuted(!muted)}>unmuted</button>
+              <button onClick={() => setPlaying(!playing)} className='mx-1 bg-blue-700 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full'>{playing ? 'pause' : 'play'}</button>
+              <button onClick={() => setSoundCounter(soundCounter + 1 >= songs.length ? 0 : soundCounter + 1)} className='mx-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full'>next</button>
+              <button onClick={() => setSoundCounter(soundCounter - 1 === -1 ? songs.length - 1 : soundCounter - 1)} className='mx-1 bg-blue-700 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full'>prev</button>
+              <button className='mx-1 bg-blue-200 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full'>repeat</button>
+            </div>
+          </div>
+          <div>
+            <h2 className='text-center mt-3 mb-2'>Search</h2>
+            <form className='flex' onSubmit={handleSubmitSong}>
+              <input
+                className='flex-1 px-2 py-1'
+                type="text"
+                onChange={(e) => setCurrentSong(e.target.value)}
+                value={currentSong}
+                placeholder="youtube.com/watch?v=ExVtrgh..."
+              />
+              <button className='flex-4 px-2 bg-gray-800' type="submit">🎶</button>
+            </form>
+          </div>
         </>
       ) : (
         ""
       )}
-      <form onSubmit={handleSubmitSong}>
-        <input
-          type="text"
-          onChange={(e) => setCurrentSong(e.target.value)}
-          value={currentSong}
-        />
-        <button type="submit"> + song</button>
-      </form>
-      <ul>
+      <h3 className='mt-5 text-xl'>List</h3>
+      <ul className='mt-5'>
         {songs?.map((song: Song, key: number) => (
-          <li key={key} style={{ color: "#fff" }}>
+          <li className={`flex flex-col px-5 py-3 rounded-lg ${soundCounter === key ? 'bg-blue-400' : ''}`} key={key} style={{ color: "#fff" }}>
             <b>{song.user}</b> sumo a la lista{" "}
-            <a href={song.song}>{song.song}</a>
+            <a className="text-bold" href={song.song}>🎶 Link Youtube</a>
             <br></br>
             <small>{new Date(song.date).toLocaleTimeString()}</small>
           </li>
         ))}
       </ul>
-    </>
+    </div>
   );
 };
 

@@ -40,7 +40,7 @@ rooms.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         name,
     });
     res
-        .json({ message: "Room added successfully!", data: room, status: 200 })
+        .json({ message: "Room created successfully!", data: room, status: 200 })
         .status(200);
 }));
 // // Delete one room

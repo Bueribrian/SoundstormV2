@@ -17,6 +17,7 @@ Crear pages: Rooms, Login, Register, Home
 
 const BASE_URL: string = process.env.REACT_APP_BASE_URL || "192.168.0.33:4000";
 
+
 interface Song {
   length: string | string[] | MediaStream | SourceProps[] | undefined;
   song: string;
@@ -59,6 +60,7 @@ function App() {
       await socketRef.current.on("users", (users: string[]) => setUsers(users));
 
       await socketRef.current.on("songs", (data: Array<Song>) => {
+        console.log(data)
         setSongs(data);
       });
 
@@ -71,7 +73,7 @@ function App() {
       setLoaded(true);
     })();
 
-    return () => socketRef.current.disconect();
+    return () => socketRef.current.on('disconnect');
   }, []);
 
   function handleSubmitSong(e: any) {
@@ -101,23 +103,27 @@ function App() {
   }
 
   return loaded ? (
-    <div className="App">
-      <Player
-        songs={songs}
-        handleSubmitSong={handleSubmitSong}
-        currentSong={currentSong}
-        setCurrentSong={setCurrentSong}
-      />
-      <Chat
-        users={users}
-        messages={messages}
-        userId={userId}
-        handleSubmit={handleSubmit}
-        bottomRef={bottomRef}
-        currentMessage={currentMessage}
-        setCurrentMessage={setCurrentMessage}
-      />
-    </div>
+    <>
+      <h1 className='text-center w-full py-5'>Songstorm 2.0</h1>
+      <div className="App container mx-auto p-3  flex flex-wrap bg-gray-700">
+        {loaded ? <> <Player
+          className="flex-1 	p-5"
+          songs={songs}
+          handleSubmitSong={handleSubmitSong}
+          currentSong={currentSong}
+          setCurrentSong={setCurrentSong}
+        />
+          <Chat
+            className="flex-1 mt-5 p-3 bg-gray-800  max-h-96 flex flex-col"
+            users={users}
+            messages={messages}
+            userId={userId}
+            handleSubmit={handleSubmit}
+            bottomRef={bottomRef}
+            currentMessage={currentMessage}
+            setCurrentMessage={setCurrentMessage}
+          /></> : "loading..."}
+      </div></>
   ) : (
     <h1>loading...</h1>
   );

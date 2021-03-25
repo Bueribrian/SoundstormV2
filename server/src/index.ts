@@ -9,11 +9,11 @@ import rooms from "./routes/rooms";
 import auth from "./routes/auth";
 import jwtAuth from "socketio-jwt-auth";
 import * as io from "socket.io";
-// App setup
-dotenv.config();
 
+// App setup
 const app = express();
 const server = http.createServer(app);
+dotenv.config();
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -34,16 +34,13 @@ app.get("/", (req, res) => res.json({ message: "Hello world 🌎" }));
 app.use("/rooms", rooms);
 app.use("/auth", auth);
 
-let messages: object[] = [
+let songs: object[] = [
   {
-    txt: "Hellow from the backend",
-    date: Date.now(),
-    id: "!12as@!__asD!2",
-  },
+    song:"https://www.youtube.com/watch?v=SYM-RJwSGQ8&ab_channel=ToveLoVEVO",
+    date:Date.now(),
+    user:"User-1234"
+  }
 ];
-
-
-let songs: object[] = [];
 
 socketIo.use(
   jwtAuth.authenticate(
@@ -51,6 +48,8 @@ socketIo.use(
       secret: process.env.JWT_SECRET,
     },
     (payload, done) => {
+      // TODO
+      // Authenticacion de usuario por socket
       console.log(payload);
       console.log("Authentication passed!");
       return done(null, {});
@@ -65,13 +64,13 @@ const RoomMethods = {
   },
   getChat: async () => {
     let { chat }: any = await Room.findById({
-      _id: "605a5545df0314b31cea8432",
+      _id: "605c97e684cb5a0c1c817717",
     });
     return chat;
   },
   addComment: async ({ txt, user }) => {
     let comment = await Room.findByIdAndUpdate(
-      { _id: "605a5545df0314b31cea8432" },
+      { _id: "605c97e684cb5a0c1c817717" },  
       { $push: { chat: { txt, user } } }
     );
   },
@@ -99,7 +98,7 @@ socketIo.on("connection", async function (socket) {
   }))
 
   socket.on("addSong", (data) => {
-    songs.unshift(data);
+    songs.push(data);
     console.log(data);
     console.log(songs);
     socketIo.emit("songs", songs);

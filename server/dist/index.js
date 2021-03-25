@@ -43,9 +43,9 @@ const auth_1 = __importDefault(require("./routes/auth"));
 const socketio_jwt_auth_1 = __importDefault(require("socketio-jwt-auth"));
 const io = __importStar(require("socket.io"));
 // App setup
-dotenv_1.default.config();
 const app = express_1.default();
 const server = http_1.default.createServer(app);
+dotenv_1.default.config();
 mongoose_1.default.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -63,17 +63,18 @@ app.use(express_1.default.json());
 app.get("/", (req, res) => res.json({ message: "Hello world 🌎" }));
 app.use("/rooms", rooms_1.default);
 app.use("/auth", auth_1.default);
-let messages = [
+let songs = [
     {
-        txt: "Hellow from the backend",
+        song: "https://www.youtube.com/watch?v=SYM-RJwSGQ8&ab_channel=ToveLoVEVO",
         date: Date.now(),
-        id: "!12as@!__asD!2",
-    },
+        user: "User-1234"
+    }
 ];
-let songs = [];
 socketIo.use(socketio_jwt_auth_1.default.authenticate({
     secret: process.env.JWT_SECRET,
 }, (payload, done) => {
+    // TODO
+    // Authenticacion de usuario por socket
     console.log(payload);
     console.log("Authentication passed!");
     return done(null, {});
@@ -85,12 +86,12 @@ const RoomMethods = {
     }),
     getChat: () => __awaiter(void 0, void 0, void 0, function* () {
         let { chat } = yield room_1.default.findById({
-            _id: "605a5545df0314b31cea8432",
+            _id: "605c97e684cb5a0c1c817717",
         });
         return chat;
     }),
     addComment: ({ txt, user }) => __awaiter(void 0, void 0, void 0, function* () {
-        let comment = yield room_1.default.findByIdAndUpdate({ _id: "605a5545df0314b31cea8432" }, { $push: { chat: { txt, user } } });
+        let comment = yield room_1.default.findByIdAndUpdate({ _id: "605c97e684cb5a0c1c817717" }, { $push: { chat: { txt, user } } });
     }),
 };
 let usersConnected = [];
@@ -110,7 +111,7 @@ socketIo.on("connection", function (socket) {
             socket.join(room);
         }));
         socket.on("addSong", (data) => {
-            songs.unshift(data);
+            songs.push(data);
             console.log(data);
             console.log(songs);
             socketIo.emit("songs", songs);

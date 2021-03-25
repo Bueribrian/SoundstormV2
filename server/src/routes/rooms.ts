@@ -34,7 +34,7 @@ rooms.post("/", async (req, res) => {
   });
 
   res
-    .json({ message: "Room added successfully!", data: room, status: 200 })
+    .json({ message: "Room created successfully!", data: room, status: 200 })
     .status(200);
 });
 
