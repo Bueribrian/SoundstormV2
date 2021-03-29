@@ -11,7 +11,7 @@ let usersArr: object[] = [
     email: "bbueri@the-8agency.com",
     password: "1234",
   },
-];
+]; 
 
 // Get all auth
 auth.post("/login", (req, res) => {

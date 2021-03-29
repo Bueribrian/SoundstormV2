@@ -14,7 +14,7 @@ const Chat: FC<any> = ({ users, messages, userId, handleSubmit, bottomRef, curre
       <small className="users_connected">
         Usuarios conectados: {users.length}
       </small>
-      <div className="chat container max-h-96 overflow-y-scroll flex flex-col	py-3 px-6 mb-3" ref={bottomRef}>
+      <div className="messages-wrapper min-full container  overflow-y-scroll flex flex-col	py-3 px-6 mb-3" >
         {messages.length === 0 ? <div
           className="message"
         >
@@ -22,7 +22,7 @@ const Chat: FC<any> = ({ users, messages, userId, handleSubmit, bottomRef, curre
 
         </div> : messages?.map(({ txt, date, user }: Message, key: number) => (
           <div
-            className={`message p-3 my-1 pl-2 w-auto bg-gray-900 rounded-lg ${user === userId ? "ml-auto" : ""}`}
+            className={`message p-3 my-1 pl-2 w-auto bg-gray-900 rounded-lg w-max ${user === userId ? "ml-auto bg-blue-100 text-black" : ""}`}
             key={key}
           >
             <p className="message__text">{txt}</p>
@@ -33,8 +33,8 @@ const Chat: FC<any> = ({ users, messages, userId, handleSubmit, bottomRef, curre
               {new Date(date).toLocaleTimeString()}
             </time>
           </div>
-
         ))}
+        <div ref={bottomRef}></div>
       </div>
       <form className="form container mt-auto flex mt-5" onSubmit={handleSubmit}>
         <input

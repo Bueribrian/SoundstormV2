@@ -6,6 +6,7 @@ import helmet from "helmet";
 import dotenv from "dotenv";
 import Room from "./models/room";
 import rooms from "./routes/rooms";
+import videos from "./routes/videos";
 import auth from "./routes/auth";
 import jwtAuth from "socketio-jwt-auth";
 import * as io from "socket.io";
@@ -31,15 +32,17 @@ app.use(helmet());
 app.use(express.json());
 
 app.get("/", (req, res) => res.json({ message: "Hello world 🌎" }));
+app.use("/videos", videos);
+app.get('/v',(req,res)=>res.json({msg:'works'}))
 app.use("/rooms", rooms);
 app.use("/auth", auth);
 
 let songs: object[] = [
   {
-    song:"https://www.youtube.com/watch?v=SYM-RJwSGQ8&ab_channel=ToveLoVEVO",
-    date:Date.now(),
-    user:"User-1234"
-  }
+    song: "https://www.youtube.com/watch?v=SYM-RJwSGQ8&ab_channel=ToveLoVEVO",
+    date: Date.now(),
+    user: "User-1234",
+  },
 ];
 
 socketIo.use(
@@ -50,7 +53,6 @@ socketIo.use(
     (payload, done) => {
       // TODO
       // Authenticacion de usuario por socket
-      console.log(payload);
       console.log("Authentication passed!");
       return done(null, {});
     }
@@ -59,18 +61,25 @@ socketIo.use(
 
 const RoomMethods = {
   getRooms: async () => {
-    let rooms = await Room.find()
-    return rooms
+    let rooms = await Room.find();
+    return rooms;
   },
   getChat: async () => {
-    let { chat }: any = await Room.findById({
-      _id: "605c97e684cb5a0c1c817717",
-    });
-    return chat;
+    try {
+      let room: any = await Room.findById({
+        _id: "6061ee245f2afcd528c44988",
+      });
+      console.log(room);
+      return room.chat;
+    } catch (err) {
+      (err) => {
+        console.error(err);
+      };
+    }
   },
   addComment: async ({ txt, user }) => {
     let comment = await Room.findByIdAndUpdate(
-      { _id: "605c97e684cb5a0c1c817717" },  
+      { _id: "6061ee245f2afcd528c44988" },
       { $push: { chat: { txt, user } } }
     );
   },
@@ -93,9 +102,9 @@ socketIo.on("connection", async function (socket) {
   socketIo.emit("messages", await RoomMethods.getChat());
   socketIo.emit("songs", songs);
 
-  socket.on('room',(room =>{
-    socket.join(room)
-  }))
+  socket.on("room", (room) => {
+    socket.join(room);
+  });
 
   socket.on("addSong", (data) => {
     songs.push(data);
@@ -117,11 +126,12 @@ socketIo.on("connection", async function (socket) {
     console.log("Connected clients:", usersConnected);
   });
 });
+ 
 
 server.listen(4000, () => {
   db.on("error", console.error.bind(console, "connection error:"));
   db.once("open", function () {
     console.log("Database connected 🙌");
   });
-  console.log("✨️ Server on port 4000");
+  console.log("✨️ Server on port 4000" );
 });

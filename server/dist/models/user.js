@@ -7,13 +7,17 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const { Schema } = mongoose_1.default;
 let stringRequired = {
     type: String,
-    required: true
+    required: true,
 };
 const UserSchema = new Schema({
     name: stringRequired,
     last_name: stringRequired,
     password: stringRequired,
     email: stringRequired,
-}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
-module.exports = mongoose_1.default.model(UserSchema, 'User');
+    role: {
+        type: String,
+        default: "guest",
+    },
+}, { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } });
+module.exports = mongoose_1.default.model(UserSchema, "User");
 //# sourceMappingURL=user.js.map

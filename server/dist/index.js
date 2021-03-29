@@ -39,6 +39,7 @@ const helmet_1 = __importDefault(require("helmet"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const room_1 = __importDefault(require("./models/room"));
 const rooms_1 = __importDefault(require("./routes/rooms"));
+const videos_1 = __importDefault(require("./routes/videos"));
 const auth_1 = __importDefault(require("./routes/auth"));
 const socketio_jwt_auth_1 = __importDefault(require("socketio-jwt-auth"));
 const io = __importStar(require("socket.io"));
@@ -61,21 +62,22 @@ app.use(cors_1.default());
 app.use(helmet_1.default());
 app.use(express_1.default.json());
 app.get("/", (req, res) => res.json({ message: "Hello world 🌎" }));
+app.use("/videos", videos_1.default);
+app.get('/v', (req, res) => res.json({ msg: 'works' }));
 app.use("/rooms", rooms_1.default);
 app.use("/auth", auth_1.default);
 let songs = [
     {
         song: "https://www.youtube.com/watch?v=SYM-RJwSGQ8&ab_channel=ToveLoVEVO",
         date: Date.now(),
-        user: "User-1234"
-    }
+        user: "User-1234",
+    },
 ];
 socketIo.use(socketio_jwt_auth_1.default.authenticate({
     secret: process.env.JWT_SECRET,
 }, (payload, done) => {
     // TODO
     // Authenticacion de usuario por socket
-    console.log(payload);
     console.log("Authentication passed!");
     return done(null, {});
 }));
@@ -85,13 +87,21 @@ const RoomMethods = {
         return rooms;
     }),
     getChat: () => __awaiter(void 0, void 0, void 0, function* () {
-        let { chat } = yield room_1.default.findById({
-            _id: "605c97e684cb5a0c1c817717",
-        });
-        return chat;
+        try {
+            let room = yield room_1.default.findById({
+                _id: "6061ee245f2afcd528c44988",
+            });
+            console.log(room);
+            return room.chat;
+        }
+        catch (err) {
+            (err) => {
+                console.error(err);
+            };
+        }
     }),
     addComment: ({ txt, user }) => __awaiter(void 0, void 0, void 0, function* () {
-        let comment = yield room_1.default.findByIdAndUpdate({ _id: "605c97e684cb5a0c1c817717" }, { $push: { chat: { txt, user } } });
+        let comment = yield room_1.default.findByIdAndUpdate({ _id: "6061ee245f2afcd528c44988" }, { $push: { chat: { txt, user } } });
     }),
 };
 let usersConnected = [];
@@ -107,9 +117,9 @@ socketIo.on("connection", function (socket) {
         socketIo.emit("users", usersConnected);
         socketIo.emit("messages", yield RoomMethods.getChat());
         socketIo.emit("songs", songs);
-        socket.on('room', (room => {
+        socket.on("room", (room) => {
             socket.join(room);
-        }));
+        });
         socket.on("addSong", (data) => {
             songs.push(data);
             console.log(data);
