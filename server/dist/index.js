@@ -38,6 +38,7 @@ const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const room_1 = __importDefault(require("./models/room"));
+const user_1 = __importDefault(require("./models/user"));
 const rooms_1 = __importDefault(require("./routes/rooms"));
 const videos_1 = __importDefault(require("./routes/videos"));
 const auth_1 = __importDefault(require("./routes/auth"));
@@ -63,35 +64,43 @@ app.use(helmet_1.default());
 app.use(express_1.default.json());
 app.get("/", (req, res) => res.json({ message: "Hello world 🌎" }));
 app.use("/videos", videos_1.default);
-app.get('/v', (req, res) => res.json({ msg: 'works' }));
+app.get("/v", (req, res) => res.json({ msg: "works" }));
 app.use("/rooms", rooms_1.default);
 app.use("/auth", auth_1.default);
-let songs = [
-    {
-        song: "https://www.youtube.com/watch?v=SYM-RJwSGQ8&ab_channel=ToveLoVEVO",
-        date: Date.now(),
-        user: "User-1234",
-    },
-];
 socketIo.use(socketio_jwt_auth_1.default.authenticate({
     secret: process.env.JWT_SECRET,
 }, (payload, done) => {
-    // TODO
-    // Authenticacion de usuario por socket
-    console.log("Authentication passed!");
-    return done(null, {});
+    // you done callback will not include any payload data now
+    // if no token was supplied
+    if (payload && payload.name) {
+        user_1.default.findOne({ name: payload.name }, function (err, user) {
+            if (err) {
+                // return error
+                return done(err);
+            }
+            if (!user) {
+                // return fail with an error message
+                return done(null, false, "user does not exist");
+            }
+            // return success with a user info
+            return done(null, user);
+        });
+    }
+    else {
+        return done(); // in your connection handler user.logged_in will be false
+    }
 }));
 const RoomMethods = {
-    getRooms: () => __awaiter(void 0, void 0, void 0, function* () {
+    getRooms: (id) => __awaiter(void 0, void 0, void 0, function* () {
         let rooms = yield room_1.default.find();
         return rooms;
     }),
-    getChat: () => __awaiter(void 0, void 0, void 0, function* () {
+    getChat: (id) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             let room = yield room_1.default.findById({
-                _id: "6061ee245f2afcd528c44988",
+                _id: id,
             });
-            console.log(room);
+            // console.log(room);
             return room.chat;
         }
         catch (err) {
@@ -100,41 +109,55 @@ const RoomMethods = {
             };
         }
     }),
-    addComment: ({ txt, user }) => __awaiter(void 0, void 0, void 0, function* () {
-        let comment = yield room_1.default.findByIdAndUpdate({ _id: "6061ee245f2afcd528c44988" }, { $push: { chat: { txt, user } } });
+    addComment: ({ txt, user }, id) => __awaiter(void 0, void 0, void 0, function* () {
+        let comment = yield room_1.default.findByIdAndUpdate({ _id: id }, { $push: { chat: { txt, user } } });
+    }),
+    getSongs: (id) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            let room = yield room_1.default.findById({
+                _id: id,
+            });
+            // console.log(room);
+            return room.playlist;
+        }
+        catch (err) {
+            (err) => {
+                console.error(err);
+            };
+        }
+    }),
+    addSong: ({ song, user, name, thumbnail }, id) => __awaiter(void 0, void 0, void 0, function* () {
+        let Song = yield room_1.default.findByIdAndUpdate({ _id: id }, { $push: { playlist: { song, user, name, thumbnail, date: Date.now() } } });
     }),
 };
 let usersConnected = [];
 socketIo.on("connection", function (socket) {
     return __awaiter(this, void 0, void 0, function* () {
-        // let roomChat = await RoomMethods.getChat();
-        // console.log(socket)
-        // let rooms = await RoomMethods.getRooms()
         usersConnected = [...usersConnected, socket.id];
         console.log("Connected clients:", usersConnected);
-        socket.emit("init", { hello: "world" });
-        socket.emit("id", socket.id);
-        socketIo.emit("users", usersConnected);
-        socketIo.emit("messages", yield RoomMethods.getChat());
-        socketIo.emit("songs", songs);
-        socket.on("room", (room) => {
+        let socketRoom;
+        socket.on("join", (room) => __awaiter(this, void 0, void 0, function* () {
+            console.log(`Socket ${socket.id} joining ${room}`);
             socket.join(room);
-        });
-        socket.on("addSong", (data) => {
-            songs.push(data);
-            console.log(data);
-            console.log(songs);
-            socketIo.emit("songs", songs);
-        });
-        socket.on("addMessage", (message) => __awaiter(this, void 0, void 0, function* () {
-            RoomMethods.addComment(message);
-            console.log(message);
-            socketIo.emit("messages", yield RoomMethods.getChat());
+            socketRoom = room;
+            socketIo.to(room).emit("users", usersConnected);
+            socketIo.to(room).emit('messages', yield RoomMethods.getChat(room));
+            socketIo.to(room).emit('songs', yield RoomMethods.getSongs(room));
         }));
-        socket.on("disconnect", () => {
+        socket.on("addSong", (data) => __awaiter(this, void 0, void 0, function* () {
+            let { song, room } = data;
+            RoomMethods.addSong(song, room);
+            socketIo.to(room).emit("songs", yield RoomMethods.getSongs(room));
+        }));
+        socket.on("addMessage", (data) => __awaiter(this, void 0, void 0, function* () {
+            let { message, room } = data;
+            RoomMethods.addComment(message, room);
+            socketIo.to(room).emit("messages", yield RoomMethods.getChat(room));
+        }));
+        socket.on("disconnect", (room) => {
             usersConnected = usersConnected.filter((user) => user !== socket.id);
+            socketIo.to(room).emit("users", usersConnected);
             socket.disconnect();
-            socketIo.emit("users", usersConnected);
             console.log("Connected clients:", usersConnected);
         });
     });

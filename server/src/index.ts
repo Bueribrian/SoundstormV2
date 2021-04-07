@@ -5,6 +5,7 @@ import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
 import Room from "./models/room";
+import User from "./models/user";
 import rooms from "./routes/rooms";
 import videos from "./routes/videos";
 import auth from "./routes/auth";
@@ -33,17 +34,9 @@ app.use(express.json());
 
 app.get("/", (req, res) => res.json({ message: "Hello world 🌎" }));
 app.use("/videos", videos);
-app.get('/v',(req,res)=>res.json({msg:'works'}))
+app.get("/v", (req, res) => res.json({ msg: "works" }));
 app.use("/rooms", rooms);
 app.use("/auth", auth);
-
-let songs: object[] = [
-  {
-    song: "https://www.youtube.com/watch?v=SYM-RJwSGQ8&ab_channel=ToveLoVEVO",
-    date: Date.now(),
-    user: "User-1234",
-  },
-];
 
 socketIo.use(
   jwtAuth.authenticate(
@@ -51,25 +44,39 @@ socketIo.use(
       secret: process.env.JWT_SECRET,
     },
     (payload, done) => {
-      // TODO
-      // Authenticacion de usuario por socket
-      console.log("Authentication passed!");
-      return done(null, {});
+      // you done callback will not include any payload data now
+      // if no token was supplied
+      if (payload && payload.name) {
+        User.findOne({ name: payload.name }, function (err, user) {
+          if (err) {
+            // return error
+            return done(err);
+          }
+          if (!user) {
+            // return fail with an error message
+            return done(null, false, "user does not exist");
+          }
+          // return success with a user info
+          return done(null, user);
+        });
+      } else {
+        return done(); // in your connection handler user.logged_in will be false
+      }
     }
   )
 );
 
 const RoomMethods = {
-  getRooms: async () => {
+  getRooms: async (id) => {
     let rooms = await Room.find();
     return rooms;
   },
-  getChat: async () => {
+  getChat: async (id) => {
     try {
       let room: any = await Room.findById({
-        _id: "6061ee245f2afcd528c44988",
+        _id: id,
       });
-      console.log(room);
+      // console.log(room);
       return room.chat;
     } catch (err) {
       (err) => {
@@ -77,10 +84,29 @@ const RoomMethods = {
       };
     }
   },
-  addComment: async ({ txt, user }) => {
+  addComment: async ({ txt, user }, id) => {
     let comment = await Room.findByIdAndUpdate(
-      { _id: "6061ee245f2afcd528c44988" },
+      { _id: id },
       { $push: { chat: { txt, user } } }
+    );
+  },
+  getSongs: async (id) => {
+    try {
+      let room: any = await Room.findById({
+        _id: id,
+      });
+      // console.log(room);
+      return room.playlist;
+    } catch (err) {
+      (err) => {
+        console.error(err);
+      };
+    }
+  },
+  addSong: async ({ song, user, name, thumbnail }, id) => {
+    let Song = await Room.findByIdAndUpdate(
+      { _id: id },
+      { $push: { playlist: { song, user, name, thumbnail, date: Date.now() } } }
     );
   },
 };
@@ -88,50 +114,43 @@ const RoomMethods = {
 let usersConnected: string[] = [];
 
 socketIo.on("connection", async function (socket) {
-  // let roomChat = await RoomMethods.getChat();
-  // console.log(socket)
-  // let rooms = await RoomMethods.getRooms()
-
   usersConnected = [...usersConnected, socket.id];
   console.log("Connected clients:", usersConnected);
-
-  socket.emit("init", { hello: "world" });
-  socket.emit("id", socket.id);
-
-  socketIo.emit("users", usersConnected);
-  socketIo.emit("messages", await RoomMethods.getChat());
-  socketIo.emit("songs", songs);
-
-  socket.on("room", (room) => {
+  let socketRoom;
+  socket.on("join", async (room) => {
+    console.log(`Socket ${socket.id} joining ${room}`);
     socket.join(room);
+    socketRoom = room
+    socketIo.to(room).emit("users", usersConnected);
+    socketIo.to(room).emit('messages', await RoomMethods.getChat(room))
+    socketIo.to(room).emit('songs', await RoomMethods.getSongs(room))
+  });
+ 
+  
+  socket.on("addSong", async (data) => {
+    let { song, room } = data;
+    RoomMethods.addSong(song, room);
+    socketIo.to(room).emit("songs", await RoomMethods.getSongs(room));
   });
 
-  socket.on("addSong", (data) => {
-    songs.push(data);
-    console.log(data);
-    console.log(songs);
-    socketIo.emit("songs", songs);
+  socket.on("addMessage", async (data) => {
+    let { message, room } = data;
+    RoomMethods.addComment(message,  room);
+    socketIo.to(room).emit("messages", await RoomMethods.getChat(room));
   });
 
-  socket.on("addMessage", async (message) => {
-    RoomMethods.addComment(message);
-    console.log(message);
-    socketIo.emit("messages", await RoomMethods.getChat());
-  });
-
-  socket.on("disconnect", () => {
+  socket.on("disconnect", (room) => {
     usersConnected = usersConnected.filter((user) => user !== socket.id);
+    socketIo.to(room).emit("users", usersConnected);
     socket.disconnect();
-    socketIo.emit("users", usersConnected);
     console.log("Connected clients:", usersConnected);
   });
 });
- 
 
 server.listen(4000, () => {
   db.on("error", console.error.bind(console, "connection error:"));
   db.once("open", function () {
     console.log("Database connected 🙌");
   });
-  console.log("✨️ Server on port 4000" );
+  console.log("✨️ Server on port 4000");
 });

@@ -7,11 +7,12 @@ class YoutubeController {
     part: "snippet",
     videoDuration: "medium",
     videoCategoryId: 10,
-    maxResults: 15,
+    maxResults: 30,
+    order:'viewCount'
   };
   async getVideos(query) {
     let response = await fetch(
-      `${this.URL}q=${query}&type=${this.params.type}&part=${this.params.part}&videoDuration=${this.params.videoDuration}&videoCategoryId=${this.params.videoCategoryId}&maxResults=${this.params.maxResults}&key=${process.env.YOUTUBE_API_KEY}`
+      `${this.URL}q=${query}&type=${this.params.type}&part=${this.params.part}&maxResults=${this.params.maxResults}&key=${process.env.YOUTUBE_API_KEY}`
     );
     let data = await response.json();
     return data;

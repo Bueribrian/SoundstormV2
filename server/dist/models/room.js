@@ -16,6 +16,8 @@ const RoomSchema = new Schema({
             song: "https://www.youtube.com/watch?v=LoheCz4t2xc&ab_channel=systemofadownVEVO",
             created_at: Date.now(),
             updated_at: Date.now(),
+            name: "System Of A Down - Hypnotize (Official Video)",
+            thumbnail: "https://i.ytimg.com/vi/LoheCz4t2xc/mqdefault.jpg",
             user_id: 1,
         },
     },

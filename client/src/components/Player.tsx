@@ -1,5 +1,8 @@
 import { FC, useState, useRef } from "react";
+import styled from "styled-components";
 import ReactPlayer from "react-player";
+import PlayerControls from "./PlayerControls";
+import Searcher from "./Searcher";
 import { SourceProps } from "react-player/base";
 
 interface Song {
@@ -7,7 +10,15 @@ interface Song {
   song: string;
   date: Date;
   user: string;
+  name: string;
+  thumbnail: string;
 }
+
+const decodeHtmlEntity = function (str: string) {
+  return str.replace(/&#(\d+);/g, function (match, dec) {
+    return String.fromCharCode(dec);
+  });
+};
 
 const Player: FC<any> = ({
   songs,
@@ -22,7 +33,6 @@ const Player: FC<any> = ({
   const [soundCounter, setSoundCounter] = useState(0);
   const [muted, setMuted] = useState<boolean | undefined>(true);
   const [playing, setPlaying] = useState(true);
-  const fullScreenSearcherRef = useRef(null);
 
   return (
     <div {...rest}>
@@ -35,122 +45,119 @@ const Player: FC<any> = ({
               playing={playing}
               width="100%"
               height="100%"
-              volume={0.2}
+              volume={1}
               muted={muted}
               controls={true}
-              onEnded={() =>
+              onEnded={() => {
                 setSoundCounter(
                   soundCounter + 1 >= songs.length ? 0 : soundCounter + 1
-                )
-              }
+                );
+                return setTimeout(() => setPlaying(true), 500);
+              }}
               url={songs[soundCounter].song || ""}
             />
           </div>
-          <div>
-            <h2 className="text-center mt-3 mb-2">Controls</h2>
-            <div className="flex justify-center bg-gray-800 p-3">
-              <button
-                className="mx-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
-                onClick={() => setMuted(!muted)}
-              >
-                unmuted
-              </button>
-              <button
-                onClick={() => setPlaying(!playing)}
-                className="mx-1 bg-blue-700 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
-              >
-                {playing ? "pause" : "play"}
-              </button>
-              <button
-                onClick={() =>
-                  setSoundCounter(
-                    soundCounter + 1 >= songs.length ? 0 : soundCounter + 1
-                  )
-                }
-                className="mx-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
-              >
-                next
-              </button>
-              <button
-                onClick={() =>
-                  setSoundCounter(
-                    soundCounter - 1 === -1
-                      ? songs.length - 1
-                      : soundCounter - 1
-                  )
-                }
-                className="mx-1 bg-blue-700 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
-              >
-                prev
-              </button>
-              <button className="mx-1 bg-blue-200 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
-                repeat
-              </button>
-            </div>
-          </div>
-          <div>
-            <h2 className="text-center mt-3 mb-2">Search</h2>
-            <form className="flex" onSubmit={handleSubmitSong}>
-              <input
-                className="flex-1 px-2 py-1 text-black"
-                type="text"
-                onChange={(e) => setCurrentSong(e.target.value)}
-                value={currentSong}
-                placeholder="youtube.com/watch?v=ExVtrgh..."
-              />
-              <button className="flex-4 px-2 bg-gray-800" type='submit'>
-                🎶
-              </button>
-            </form>
-            {currentSong.length !== 0 ? (
-              <div ref={fullScreenSearcherRef} className="fullscreen-searcher">
-                <div className='searcher'>
-                  <form className="flex" onSubmit={handleSubmitSong}>
-                    <input
-                      className="flex-1 px-2 py-1 text-black"
-                      type="text"
-                      onChange={(e) => setCurrentSong(e.target.value)}
-                      value={currentSong}
-                      placeholder="youtube.com/watch?v=ExVtrgh..."
-                    />
-                    <button className="flex-4 px-2 bg-gray-800" type="submit">
-                      🎶
-                    </button>
-                  </form>
-                </div>
-                <div className="results">
-                  {songsSearch || songsSearch.lenght > 0 ? songsSearch.map((song:any,key:number) => <div key={key} onClick={e=>{postSong({song:song.url,user:'random',date:Date.now()})}}>{song.snippet.title}</div>):"Hola"}
-                </div>
-              </div>
-            ) : (
-              ""
-            )}
-          </div>
+          <PlayerControls
+            setMuted={setMuted}
+            setPlaying={setPlaying}
+            setSoundCounter={setSoundCounter}
+            soundCounter={soundCounter}
+            playing={playing}
+            muted={muted}
+            songs={songs}
+          />
+          <Searcher
+            handleSubmitSong={handleSubmitSong}
+            setCurrentSong={setCurrentSong}
+            currentSong={currentSong}
+            songsSearch={songsSearch}
+            postSong={postSong}
+            setSongsSearch={setSongsSearch}
+          />
         </>
       ) : (
         ""
       )}
-      <h3 className="mt-5 text-xl">List</h3>
-      <ul className="mt-5">
+      <SongsResultsList>
         {songs?.map((song: Song, key: number) => (
           <li
-            className={`flex flex-col px-5 py-3 rounded-lg ${
-              soundCounter === key ? "bg-blue-400" : ""
-            }`}
+            className={` ${soundCounter === key ? "bg-blue-900" : ""}`}
+            onClick={() => {
+              setSoundCounter(key);
+              setPlaying(true);
+            }}
             key={key}
             style={{ color: "#fff" }}
           >
-            <b>{song.user}</b> sumo a la lista{" "}
-            <a className="text-bold" href={song.song}>
-              🎶 Link Youtube
-            </a>
-            <br></br>
-            <small>{new Date(song.date).toLocaleTimeString()}</small>
+            <div className="flex items-center justify-between pt-2">
+              <p className="pr-5 ">
+                <span className="font-thin text-sm">
+                  {song.user} sumo a la lista{" "}
+                </span>{" "}
+                <br></br>
+                {decodeHtmlEntity(song.name ? song.name : "untitled")}
+              </p>
+              <img
+                src={song.thumbnail}
+                alt="song thumbnail"
+                width="150px"
+                height="125px"
+                className="rounded"
+              />
+            </div>
+            {/* <small>
+              {new Date(song.date).toLocaleTimeString(navigator.language, {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </small> */}
           </li>
         ))}
-      </ul>
+      </SongsResultsList>
     </div>
   );
 };
+
+const SongsResultsList = styled.ul`
+  width: 100%;
+  height: 100%;
+  margin-top: 0rem;
+  max-height: 25rem;
+  padding: 0rem 1rem 0rem 0rem;
+  overflow-y: scroll;
+  background: #0a0a0a;
+  border-radius: 10px;
+
+  & > li {
+    cursor: pointer;
+    transition: 0.2s all;
+    padding: 0.5rem 1.5rem;
+
+    & > * {
+      margin-bottom: 0.5rem;
+    }
+
+    &:not(:last-child) {
+      border-bottom: 1px solid #131313;
+    }
+
+    &:hover,
+    &:focus {
+      background: #160741;
+      transition: 0.2s all;
+    }
+
+    @media screen and (max-width: 480px) {
+      & > div {
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        & > * {
+          margin-bottom: .3rem;
+        }
+      }
+    }
+  }
+`;
 
 export default Player;

@@ -1,17 +1,22 @@
 import mongoose from "mongoose";
-const { Schema } = mongoose;
+import bcrypt from "bcrypt";
+const { Schema, Document } = mongoose;
+
+interface UserI extends Document {
+  name: string;
+  password: string;
+  role: string;
+}
 
 let stringRequired = {
   type: String,
   required: true,
 };
 
-const UserSchema = new Schema(
+const UserSchema: Schema = new Schema(
   {
     name: stringRequired,
-    last_name: stringRequired,
     password: stringRequired,
-    email: stringRequired,
     role: {
       type: String,
       default: "guest",
@@ -20,4 +25,9 @@ const UserSchema = new Schema(
   { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );
 
-module.exports = mongoose.model(UserSchema, "User");
+UserSchema.pre("save", async function (next) {
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+
+export default mongoose.model<UserI>("User", UserSchema);
