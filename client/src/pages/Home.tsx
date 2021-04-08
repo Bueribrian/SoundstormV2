@@ -107,7 +107,7 @@ export default function HomePage() {
     e.preventDefault();
   }
   function goToBottom(): void {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
   }
 
   return loaded ? (

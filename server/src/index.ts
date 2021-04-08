@@ -147,7 +147,7 @@ socketIo.on("connection", async function (socket) {
   });
 });
 
-server.listen(4000, () => {
+server.listen( process.env.PORT || 4000, () => {
   db.on("error", console.error.bind(console, "connection error:"));
   db.once("open", function () {
     console.log("Database connected 🙌");

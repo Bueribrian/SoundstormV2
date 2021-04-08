@@ -8,7 +8,6 @@ const MainDiv = styled.main`
   position: relative;
   top: 0;
   left: 0;
-  padding: 1.5rem 0rem 3rem 0rem;
   background: #000;
   overflow-x:hidden;
 
@@ -33,7 +32,6 @@ const Wave = styled.div`
 `;
 const Content = styled.div`
   z-index: 30 !important;
-  margin-bottom: 1rem;
   height: 100%;
   width: 100%;
   position: relative;
@@ -75,6 +73,7 @@ const svgVariant = {
     opacity:1,
     transition: {
       duration: 1,
+      delay:.2,
       ease: "easeInOut",
       y: 0,
 
@@ -85,6 +84,7 @@ const svgVariant = {
     opacity:1,
     transition: {
       duration: 1,
+      delay:.3,
       ease: "easeInOut",
       y: 0,
     },

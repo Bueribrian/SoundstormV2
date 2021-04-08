@@ -92,7 +92,7 @@ const Player: FC<any> = ({
             <div className="flex items-center justify-between pt-2">
               <p className="pr-5 ">
                 <span className="font-thin text-sm">
-                  {song.user} sumo a la lista{" "}
+                  <strong className='text-purple-600 font-black'>{song.user}</strong > sumo a la lista:
                 </span>{" "}
                 <br></br>
                 {decodeHtmlEntity(song.name ? song.name : "untitled")}
@@ -123,7 +123,7 @@ const SongsResultsList = styled.ul`
   height: 100%;
   margin-top: 0rem;
   max-height: 25rem;
-  padding: 0rem 1rem 0rem 0rem;
+  // padding: 0rem 1rem 0rem 0rem;
   overflow-y: scroll;
   background: #0a0a0a;
   border-radius: 10px;
@@ -146,7 +146,9 @@ const SongsResultsList = styled.ul`
       background: #160741;
       transition: 0.2s all;
     }
-
+    @media screen and (max-width: 1080px) {
+      margin-bottom: 3rem;
+    }
     @media screen and (max-width: 480px) {
       & > div {
         display: flex;

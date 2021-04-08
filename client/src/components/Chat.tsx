@@ -12,7 +12,7 @@ const ChatWrapper = styled.div`
   max-height:54rem;
   min-height:54.2rem;
   width: 100%;
-  background: #1a1919;
+  background:#0a0a0a;
   padding: 1rem 1rem;
   border-radius: 5px;
   display: grid;
@@ -36,7 +36,7 @@ const MessagesWrapper = styled.div`
   padding: 1rem 2rem 4rem 2rem;
   overflow-y: scroll;
   grid-row: 2/3;
-  background: linear-gradient( 359deg ,#1a1919,#0a0a0a29);
+  background: linear-gradient( 359deg ,#0a0a0a5c,#0a0a0a);
 `;
 const PostMessageForm = styled.form`
   width: 100%;

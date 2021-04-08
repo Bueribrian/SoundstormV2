@@ -23,7 +23,7 @@ const RoomSchema: Schema = new Schema(
         updated_at: Date.now(),
         name:"System Of A Down - Hypnotize (Official Video)",
         thumbnail:"https://i.ytimg.com/vi/LoheCz4t2xc/mqdefault.jpg",
-        user_id: 1,
+        user: "GOD",
       },
     },
     users: [Schema.Types.ObjectId],
@@ -44,7 +44,7 @@ const RoomSchema: Schema = new Schema(
       default: {
         txt: "Bienvenido a la sala Default",
         date: Date.now(),
-        user: 1,
+        user: "GOD",
       },
     },
   },

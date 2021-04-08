@@ -3,8 +3,10 @@ import styled from "styled-components";
 const ListScroll = styled.div`
   width: 100%;
   height: 100%;
-  margin-top: 1rem;
   max-height: 45rem;
+  max-width:70%;
+  margin: 0 auto;
+  margin-top: 5rem;
   padding: 0rem 1rem 0rem 0rem;
   overflow-y: scroll;
 

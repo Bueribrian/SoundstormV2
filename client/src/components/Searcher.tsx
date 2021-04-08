@@ -108,12 +108,15 @@ const SearcherWrapper = styled.div`
   margin-top: 0rem;
   width: 100%;
   padding: 1rem 0rem;
+  transition:.3s all;
   & form {
     overflow: hidden;
     border-radius: 10px;
   }
   &.fullview {
     background: #030303;
+  transition:.3s all;
+
     & form {
       max-width: 700px;
       margin: 0 auto;
