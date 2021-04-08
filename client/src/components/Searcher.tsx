@@ -1,7 +1,6 @@
-import React, { ReactElement, useState, useRef } from "react";
+import React, { ReactElement, useState} from "react";
 import styled from "styled-components";
 import { ListScroll as SongsList } from "./ListScroll";
-import { SourceProps } from "react-player/base";
 
 // interface Song {
 //   length: string | string[] | MediaStream | SourceProps[] | undefined;
