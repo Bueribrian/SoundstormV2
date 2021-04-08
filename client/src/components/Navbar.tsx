@@ -1,12 +1,11 @@
 import React, { ReactElement, useContext } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import Auth, { AuthContext } from "../context/auth";
+// import { motion } from "framer-motion";
+import { AuthContext } from "../context/auth";
 import { logout } from "../services/auth";
 
-interface Props {}
 
-export default function Navbar({}: Props): ReactElement {
+export default function Navbar(): ReactElement {
   const AuthState: any = useContext(AuthContext);
 
   if (Boolean(AuthState.user)) {

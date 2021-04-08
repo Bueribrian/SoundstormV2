@@ -1,5 +1,5 @@
 import "./App.scss";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import ProtectedRoute from "./guard/ProtectedRoute";
 import HomePage from "./pages/Home";

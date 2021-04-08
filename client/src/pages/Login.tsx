@@ -27,7 +27,6 @@ export default function LoginPage() {
     if (response.status === 200 || response.status === 202) {
       setUser(response.data);
       UserContext.setUser(response.data)
-
       history.push("/home");
     } else {
       setStatusPost(response.message);
@@ -51,15 +50,15 @@ export default function LoginPage() {
                 autoFocus
                 {...register("name", { required: true })}
               />
-              <Input.label
+              <Input.Label
                 className={`${watch("name")?.length !== 0 ? "filled" : ""}`}
                 htmlFor="name"
               >
                 Nombre
-              </Input.label>
-              <Input.status>
+              </Input.Label>
+              <Input.Status>
                 {errors.name && <span>Este campo es requerido</span>}
-              </Input.status>
+              </Input.Status>
             </Control>
 
             <Control>
@@ -68,15 +67,15 @@ export default function LoginPage() {
                 type="password"
                 {...register("password", { required: true })}
               />
-              <Input.label
+              <Input.Label
                 className={`${watch("password")?.length !== 0 ? "filled" : ""}`}
                 htmlFor="password"
               >
                 Contraseña
-              </Input.label>
-              <Input.status>
+              </Input.Label>
+              <Input.Status>
                 {errors.password && <span>Este campo es requerido</span>}
-              </Input.status>
+              </Input.Status>
             </Control>
 
             {Boolean(statusPost) ? (
@@ -161,7 +160,7 @@ const Input: any = styled.input`
     transition: 0.3s all;
   }
 `;
-Input.label = styled.label`
+Input.Label = styled.label`
   font-size: 16px;
   font-weight: 200;
   color: #fff;
@@ -169,7 +168,7 @@ Input.label = styled.label`
   transform: translate(1rem, -2.5rem);
   transition: 0.3s all;
 `;
-Input.status = styled.div`
+Input.Status = styled.div`
   font-size: 0.9rem;
   margin-top: -1.5rem;
   padding-left: 1rem;

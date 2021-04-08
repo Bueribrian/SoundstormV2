@@ -20,10 +20,10 @@ interface Song {
   thumbnail: string;
 }
 
-interface User {
-  name: string;
-  token: string;
-}
+// interface User {
+//   name: string;
+//   token: string;
+// }
 
 interface Message {
   txt: string;
@@ -81,6 +81,7 @@ export default function HomePage() {
     })();
 
     return () => socketRef.current.on("disconnect",room);
+       // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
  

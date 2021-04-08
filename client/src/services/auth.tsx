@@ -13,10 +13,9 @@ export const login = async (user: any) => {
 };
 
 export const logout = async () => {
-  localStorage.removeItem('token')
-  document.cookie = `empty`
-  window.location.href="/login"
-
+  localStorage.removeItem("token");
+  document.cookie = `empty`;
+  window.location.href = "/login";
 };
 
 export const singup = async (user: any) => {
@@ -68,7 +67,7 @@ function getCookie(name: string) {
     var cookie = cookies[i].trim();
 
     // If this cookie has the name of what we are searching
-    if (cookie.indexOf(name) == 0) {
+    if (cookie.indexOf(name) === 0) {
       // Return everything after the cookies name
       return cookie.substring(name.length, cookie.length);
     }

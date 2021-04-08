@@ -1,4 +1,4 @@
-import { FC, useState, useRef } from "react";
+import { FC, useState} from "react";
 import styled from "styled-components";
 import ReactPlayer from "react-player";
 import PlayerControls from "./PlayerControls";

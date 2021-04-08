@@ -3,14 +3,14 @@ import styled from "styled-components";
 import { ListScroll as SongsList } from "./ListScroll";
 import { SourceProps } from "react-player/base";
 
-interface Song {
-  length: string | string[] | MediaStream | SourceProps[] | undefined;
-  song: string;
-  date: Date;
-  user: string;
-  name: string;
-  thumbnail: string;
-}
+// interface Song {
+//   length: string | string[] | MediaStream | SourceProps[] | undefined;
+//   song: string;
+//   date: Date;
+//   user: string;
+//   name: string;
+//   thumbnail: string;
+// }
 
 interface Props {
   handleSubmitSong: any;
@@ -29,7 +29,6 @@ function Searcher({
   postSong,
   setSongsSearch,
 }: Props): ReactElement {
-  const fullScreenSearcherRef = useRef(null);
   const [searching, setSearching] = useState(false);
 
   return (
