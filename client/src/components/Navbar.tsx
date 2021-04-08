@@ -24,8 +24,9 @@ export default function Navbar(): ReactElement {
       <Link className="mx-3 font-bold" to="/login">
         Login
       </Link>
-      <Link className="mx-3 font-bold" to="/register"></Link>
-      Register
+      <Link className="mx-3 font-bold" to="/register">
+        Register
+      </Link>
     </div>
   );
 }
